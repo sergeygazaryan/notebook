@@ -1,0 +1,53 @@
+name: File Template Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      filename:
+        description: 'The name of the file to create'
+        required: true
+      template:
+        description: 'The template to use'
+        required: true
+        default: 'default.py'
+        type: choice
+        options:
+          - default.py
+          - template2.py
+
+jobs:
+  generate-file:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install Jinja2
+      run: pip install jinja2
+
+    - name: Generate file from template
+      run: |
+        python generate_file.py ${{ github.event.inputs.template }} ${{ github.event.inputs.filename }}
+
+    - name: Commit and push changes
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add generated_files/
+        git commit -m "Add generated file ${{ github.event.inputs.filename }}"
+        git push
+
+    - name: Create a PR to different repository
+      uses: repo-sync/pull-request@v2
+      with:
+        source_repo: ${{ github.repository }}
+        source_branch: main
+        destination_repo: other-organization/other-repository
+        destination_branch: main
+        github_token: ${{ secrets.GITHUB_TOKEN }}
