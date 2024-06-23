@@ -22,4 +22,5 @@ if __name__ == "__main__":
     template_name = sys.argv[1]
     filename = sys.argv[2]
     schedule_interval = sys.argv[3]
-    output_filename = generate_file(template_name,
+    output_filename = generate_file(template_name, filename, schedule_interval)
+    print(output_filename)
