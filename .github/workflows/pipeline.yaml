@@ -35,19 +35,20 @@ jobs:
       run: |
         python .github/generate_dag.py ${{ github.event.inputs.template }} ${{ github.event.inputs.filename }}
 
-    - name: Commit and push changes
+    - name: Checkout target repository
       run: |
+        git clone https://github.com/sergeygazaryan/dag.git
+        cd dag
+        mkdir -p generated_files
+        cp ../generated_files/${{ github.event.inputs.filename }}.py generated_files/
+
+    - name: Commit and push changes to target repository
+      env:
+        PERSONAL_ACCESS_TOKEN: ${{ secrets.DAG_REPO_TOKEN }}
+      run: |
+        cd dag
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git add generated_files/
         git commit -m "Add generated file ${{ github.event.inputs.filename }}"
-        git push
-
-    - name: Create a PR to different repository
-      uses: repo-sync/pull-request@v2
-      with:
-        source_repo: ${{ github.repository }}
-        source_branch: main
-        destination_repo: sergeygazaryan/dag
-        destination_branch: main
-        github_token: ${{ secrets.DAG_REPO_TOKEN }}
+        git push https://$PERSONAL_ACCESS_TOKEN@github.com/sergeygazaryan/dag.git
