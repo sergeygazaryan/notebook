@@ -6,6 +6,7 @@ def generate_file(template_name, filename):
     env = Environment(loader=FileSystemLoader('templates'))
     template = env.get_template(template_name)
     
+    # Replace {filename} placeholder in the template
     output = template.render(filename=filename)
     
     # Create output filename by replacing extension and adding '-dag.py'
