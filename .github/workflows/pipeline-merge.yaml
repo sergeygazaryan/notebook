@@ -1,0 +1,57 @@
+name: Generate DAG
+
+on:
+  workflow_dispatch:
+    inputs:
+      filename:
+        description: 'Notebook file name'
+        required: true
+      template:
+        description: 'DAG template'
+        required: true
+        default: 'default.py'
+        type: choice
+        options:
+          - default.py
+          - template2.py
+
+jobs:
+  generate-file:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install Jinja2
+      run: pip install jinja2
+
+    - name: Generate file from template
+      id: generate_file
+      run: |
+        output_file=$(python .github/generate_dag.py ${{ github.event.inputs.template }} ${{ github.event.inputs.filename }})
+        echo "output_file=${output_file}" >> $GITHUB_ENV
+
+    - name: Checkout target repository
+      run: |
+        git clone https://github.com/sergeygazaryan/dag.git
+
+    - name: Copy generated file to target repository
+      run: |
+        cp generated_files/${{ env.output_file }} dag/
+
+    - name: Commit and push changes to target repository
+      env:
+        PERSONAL_ACCESS_TOKEN: ${{ secrets.DAG_REPO_TOKEN }}
+      run: |
+        cd dag
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add .
+        git commit -m "Update generated file ${{ env.output_file }}"
+        git push https://$PERSONAL_ACCESS_TOKEN@github.com/sergeygazaryan/dag.git
