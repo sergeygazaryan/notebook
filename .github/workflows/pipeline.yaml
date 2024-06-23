@@ -1,13 +1,13 @@
-name: File Template Pipeline
+name: Generate DAG
 
 on:
   workflow_dispatch:
     inputs:
       filename:
-        description: 'The name of the file to create'
+        description: 'Notebook file name'
         required: true
       template:
-        description: 'The template to use'
+        description: 'DAG template'
         required: true
         default: 'default.py'
         type: choice
