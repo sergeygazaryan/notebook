@@ -15,7 +15,7 @@ on:
           - default.py
           - template2.py
       schedule_interval:
-        description: 'Schedule Interval for DAG'
+        description: 'Schedule Interval for DAG (More info: https://airflow.apache.org/docs/apache-airflow/1.10.1/scheduler.html#dag-runs)'
         required: true
         default: '@daily'
         type: choice
