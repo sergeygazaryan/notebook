@@ -14,9 +14,23 @@ on:
         options:
           - default.py
           - template2.py
+      schedule_interval:
+        description: 'Schedule Interval for DAG'
+        required: true
+        default: '@daily'
+        type: choice
+        options:
+          - None
+          - '@once'
+          - '@hourly'
+          - '@daily'
+          - '@weekly'
+          - '@monthly'
+          - '@yearly'
+          - 'Custom Cron Expression'
 
 jobs:
-  generate-dag-and-push:
+  generate-file:
     runs-on: ubuntu-latest
 
     steps:
@@ -32,15 +46,24 @@ jobs:
       run: pip install jinja2
 
     - name: Generate file from template
+      id: generate_file
       run: |
-        python .github/generate_dag.py ${{ github.event.inputs.template }} ${{ github.event.inputs.filename }}
+        schedule_interval=${{ github.event.inputs.schedule_interval }}
+        if [ "$schedule_interval" = "Custom Cron Expression" ]; then
+          echo "schedule_interval=${{ github.event.inputs.custom_cron }}" >> $GITHUB_ENV
+        else
+          echo "schedule_interval=$schedule_interval" >> $GITHUB_ENV
+        fi
+        output_file=$(python .github/setup/generate_file.py ${{ github.event.inputs.template }} ${{ github.event.inputs.filename }} $schedule_interval)
+        echo "output_file=${output_file}" >> $GITHUB_ENV
 
     - name: Checkout target repository
       run: |
         git clone https://github.com/sergeygazaryan/dag.git
-        cd dag
-        mkdir -p generated_files
-        cp ../generated_files/${{ github.event.inputs.filename }}.py generated_files/
+
+    - name: Copy generated file to target repository
+      run: |
+        cp generated_files/${{ env.output_file }} dag/
 
     - name: Commit and push changes to target repository
       env:
@@ -49,6 +72,6 @@ jobs:
         cd dag
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        git add generated_files/
-        git commit -m "Add generated file ${{ github.event.inputs.filename }}"
+        git add .
+        git commit -m "Update generated file ${{ env.output_file }}"
         git push https://$PERSONAL_ACCESS_TOKEN@github.com/sergeygazaryan/dag.git
