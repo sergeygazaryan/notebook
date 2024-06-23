@@ -28,7 +28,9 @@ on:
           - '@monthly'
           - '@yearly'
           - 'Custom Cron Expression'
-
+      custom_cron:
+        description: 'Custom Cron Expression (Only used if "Custom Cron Expression" is selected above)'
+        required: false
 jobs:
   generate-file:
     runs-on: ubuntu-latest
