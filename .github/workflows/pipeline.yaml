@@ -33,7 +33,7 @@ jobs:
 
     - name: Generate file from template
       run: |
-        python generate_file.py ${{ github.event.inputs.template }} ${{ github.event.inputs.filename }}
+        python .github/generate_dag.py ${{ github.event.inputs.template }} ${{ github.event.inputs.filename }}
 
     - name: Commit and push changes
       run: |
@@ -48,6 +48,6 @@ jobs:
       with:
         source_repo: ${{ github.repository }}
         source_branch: main
-        destination_repo: other-organization/other-repository
+        destination_repo: sergeygazaryan/dag
         destination_branch: main
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        github_token: ${{ secrets.DAG_REPO_TOKEN }}
