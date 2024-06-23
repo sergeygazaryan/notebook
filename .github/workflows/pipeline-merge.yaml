@@ -1,4 +1,4 @@
-name: Generate DAG
+name: Generate DAG v2
 
 on:
   workflow_dispatch:
