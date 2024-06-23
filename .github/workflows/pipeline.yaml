@@ -54,7 +54,7 @@ jobs:
         else
           echo "schedule_interval=$schedule_interval" >> $GITHUB_ENV
         fi
-        output_file=$(python .github/setup/generate_file.py ${{ github.event.inputs.template }} ${{ github.event.inputs.filename }} $schedule_interval)
+        output_file=$(python .github/generate_file.py ${{ github.event.inputs.template }} ${{ github.event.inputs.filename }} $schedule_interval)
         echo "output_file=${output_file}" >> $GITHUB_ENV
 
     - name: Checkout target repository
