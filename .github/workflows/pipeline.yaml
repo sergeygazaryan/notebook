@@ -17,7 +17,7 @@ on:
       schedule_interval:
         description: 'Schedule Interval for DAG (More info: https://airflow.apache.org/docs/apache-airflow/1.10.1/scheduler.html#dag-runs)'
         required: true
-        default: '@daily'
+        default: '@once'
         type: choice
         options:
           - None
