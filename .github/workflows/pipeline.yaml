@@ -16,7 +16,7 @@ on:
           - template2.py
 
 jobs:
-  generate-file:
+  generate-dag-and-push:
     runs-on: ubuntu-latest
 
     steps:
