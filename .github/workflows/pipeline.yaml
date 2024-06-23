@@ -64,6 +64,13 @@ jobs:
     - name: Copy generated file to target repository
       run: |
         cp generated_files/${{ env.output_file }} dag/
+        cd dag
+        ls -l generated_files/
+
+    - name: Show diff for debugging
+      run: |
+        cd dag
+        git diff
 
     - name: Commit and push changes to target repository
       env:
@@ -73,5 +80,5 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git add .
-        git commit -m "Update generated file ${{ env.output_file }}"
+        git commit -m "Update generated file ${{ env.output_file }}" || echo "No changes to commit"
         git push https://$PERSONAL_ACCESS_TOKEN@github.com/sergeygazaryan/dag.git
