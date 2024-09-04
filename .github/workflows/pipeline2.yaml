@@ -1,42 +1,52 @@
-name: Two Jobs Workflow2
+name: Multi-Stage CI/CD Workflow
 
 on:
-  push:
-    branches:
-      - main  # This triggers the automatic job on push to main
-  workflow_dispatch:  # This allows manual triggering for the manual job
+  workflow_dispatch:
+    inputs:
+      deploy:  # Define the input to trigger deploy manually
+        description: 'Deploy the application'
+        required: false
+        default: 'false'
+        type: string
 
 jobs:
-  automatic_job:
+  package_build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
       
-      - name: Run Automatic Job
-        run: |
-          echo "Running automatic job!"
-          echo "This is the result from the automatic job" > result.txt
+      - name: Run Package Build
+        run: echo "Running package build"
 
-      - name: Upload Artifact
+      - name: Upload Build Package
         uses: actions/upload-artifact@v3
         with:
-          name: automatic-job-results
-          path: result.txt  # Ensure this file exists before uploading
+          name: build-package
+          path: ./build-package.zip  # Replace with actual path to the build artifact
 
-  manual_job:
+  build_docker:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch'  # Ensure this job only runs manually
+    needs: package_build  # Runs only after the package_build job is completed
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Download Artifact
+      - name: Download Build Package
         uses: actions/download-artifact@v3
         with:
-          name: automatic-job-results
-        
-      - name: Use Artifact
-        run: |
-          echo "Processing artifact from automatic job"
-          cat result.txt  # Use the result from the automatic job
+          name: build-package
+
+      - name: Build Docker Image
+        run: echo "Building Docker image"
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build_docker  # Wait for build_docker to complete
+    if: github.event.inputs.deploy == 'true'  # Only run if manually triggered with deploy=true
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Deploy Application
+        run: echo "Deploying application"
