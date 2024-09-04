@@ -1,0 +1,27 @@
+name: Two Jobs Workflow
+
+on:
+  push:
+    branches:
+      - main  # Trigger automatically on push to the main branch
+
+jobs:
+  automatic_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      
+      - name: Run Automatic Job
+        run: echo "Running automatic job!"
+
+  manual_job:
+    needs: automatic_job  # This ensures the manual job only runs after automatic_job finishes
+    runs-on: ubuntu-latest
+    if: github.event.inputs.manual_job == 'true'  # Make this job run manually
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      
+      - name: Run Manual Job
+        run: echo "Running manual job!"
