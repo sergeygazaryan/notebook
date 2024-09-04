@@ -1,4 +1,4 @@
-name: Two Jobs Workflow
+name: Two Jobs Workflow2
 
 on:
   push:
@@ -22,11 +22,11 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: automatic-job-results
-          path: result.txt  # Make sure this file is created before uploading
+          path: result.txt  # Ensure this file exists before uploading
 
   manual_job:
     runs-on: ubuntu-latest
-    if: github.event.inputs.manual_job == 'true'  # Only run if manually triggered
+    if: github.event_name == 'workflow_dispatch'  # Ensure this job only runs manually
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
