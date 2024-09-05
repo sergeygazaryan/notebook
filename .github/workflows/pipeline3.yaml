@@ -1,4 +1,4 @@
-name: Conditional Workflow
+name: Conditional Workflow with Matrix
 
 on:
   workflow_dispatch:
@@ -7,24 +7,26 @@ on:
         description: "Choose a task"
         required: true
         default: "build"
-        type: string
+        type: choice
+        options:
+          - build
+          - test
 
 jobs:
-  build-job:
-    if: ${{ github.event.inputs.task == 'build' }}
+  dynamic-job:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        task: [build, test]  # Define tasks in the matrix
+
     steps:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
           node-version: '14'
 
-      - name: Build project
-        run: echo "Building the project..."
+      - name: Run task
+        run: echo "Running task: ${{ matrix.task }}"
 
-  test-job:
-    if: ${{ github.event.inputs.task == 'test' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Run Tests
-        run: echo "Running tests..."
+    # Conditionally run the matrix job based on input
+    if: ${{ matrix.task == github.event.inputs.task }}
