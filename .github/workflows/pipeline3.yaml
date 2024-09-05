@@ -1,4 +1,4 @@
-name: Conditional Workflow with Matrix
+name: Conditional Workflow with Separate Jobs
 
 on:
   workflow_dispatch:  # Manual trigger
@@ -13,30 +13,30 @@ on:
           - test
 
 jobs:
-  dynamic-job:
+  build-job:
+    if: ${{ github.event.inputs.task == 'build' }}  # Run only if 'build' is selected
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        task: [build, test]  # Define possible tasks in the matrix
-
-    # This condition ensures that only the job matching the input is created and run
-    if: ${{ matrix.task == github.event.inputs.task }}
-
     steps:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
           node-version: '14'
-
+          
       - name: Run Build Task
-        if: ${{ matrix.task == 'build' }}
         run: |
           echo "Running build task..."
           # Add your build commands here, e.g., npm run build
 
+  test-job:
+    if: ${{ github.event.inputs.task == 'test' }}  # Run only if 'test' is selected
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+          
       - name: Run Test Task
-        if: ${{ matrix.task == 'test' }}
         run: |
           echo "Running test task..."
           # Add your test commands here, e.g., npm test
