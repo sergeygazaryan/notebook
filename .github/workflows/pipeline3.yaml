@@ -1,50 +1,30 @@
-name: Two Jobs Workflow with Manual Continuation
+name: Conditional Workflow
 
 on:
-  push:
-    branches:
-      - main  # Automatically trigger the automatic job on push
-  workflow_dispatch:  # Allows manual triggering of the second job
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "Choose a task"
+        required: true
+        default: "build"
+        type: string
 
 jobs:
-  automatic_job:
+  build-job:
+    if: ${{ github.event.inputs.task == 'build' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-      
-      - name: Run Automatic Job
-        run: |
-          echo "This is the automatic job!"
-          echo "SOME_OUTPUT=some value" >> $GITHUB_ENV  # Example of setting environment variable
-
-      - name: Save Results from Automatic Job
-        run: |
-          echo "Storing output for manual job"
-          echo "Output from automatic job" > results.txt
-        # Save the results as an artifact to pass to the manual job
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
         with:
-          name: automatic-job-results
-          path: results.txt  # Save the result file as an artifact
+          node-version: '14'
 
-  manual_job:
-    # This job depends on the automatic_job to be completed
-    needs: automatic_job  # Ensure it only runs after the automatic job finishes
+      - name: Build project
+        run: echo "Building the project..."
+
+  test-job:
+    if: ${{ github.event.inputs.task == 'test' }}
     runs-on: ubuntu-latest
-    if: github.event.inputs.manual_job == 'true'  # Only trigger manually
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-      
-      # Retrieve the artifact created in the automatic job
-      - name: Download Artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: automatic-job-results  # Download the artifact from the automatic job
-
-      - name: Use Results from Automatic Job
-        run: |
-          echo "Processing data from the automatic job"
-          cat results.txt  # Use the artifact from the automatic job
+      - name: Run Tests
+        run: echo "Running tests..."
